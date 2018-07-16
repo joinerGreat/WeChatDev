@@ -68,8 +68,8 @@ class WeChat
     public function GetAccessToken(){
         //连接redis
         $redis = new Redis();
-        $redis -> connect('localhost',6379);
-        $redis -> auth('php29gogo');
+        $redis -> connect('',);
+        $redis -> auth('');
         $redis -> select(2); //选择redis的2号数据库来作为access_token的缓存
         if( $redis -> get('access_token') ){
             return $redis -> get('access_token');
