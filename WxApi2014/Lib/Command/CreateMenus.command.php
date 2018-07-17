@@ -33,7 +33,7 @@ $data = '{
 							"type":"view",
 							"name":"子菜单3",
 							"url":"http://www.qq.com"
-						}					
+						}
 				]
 			}
 		]

@@ -39,7 +39,7 @@ class WeChat
         return $result;
 	}
 
-
+    //主要用来请求图灵机器人的问题
     public function CurlRequestPostJson( $url,$data )
     {
          //第1步:初始化虚拟浏览器
