@@ -9,8 +9,8 @@ class WxApi extends Wechat{
 	public function responseMsg(){
 		parent::responseMsg();
 
-		if( !empty($this-> keyword) ){
-			$this -> reText("");
+		if( $this-> keyword=="图片" ){
+			$this -> reImages( $mediaId );
 		}
 	}
 
@@ -18,5 +18,5 @@ class WxApi extends Wechat{
 
 $WxApi = new WxApi();
 #注解该代码就开启了自动回复功能，但是在验证TOKEN阶段必须开启
-$WxApi ->valid();
+// $WxApi ->valid();
 $WxApi -> responseMsg();
