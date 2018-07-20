@@ -22,7 +22,7 @@ class WxApi extends Wechat{
 		parent::responseMsg();
 
 		if( $this-> keyword=="嗨" ){
-			$this -> reImages( "欢迎来到微信开发！" );
+			$this -> reImages( "欢迎来到微信公众号开发！" );
 		}
 	}
 
