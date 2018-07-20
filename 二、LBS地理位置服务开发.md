@@ -10,27 +10,27 @@ $this->lng //表示经度
 >[百度地图全球逆地理编码接口](http://lbsyun.baidu.com/index.php?title=webapi/guide/webservice-geocoding-abroad)如下：
 >http://api.map.baidu.com/geocoder/v2/?callback=renderReverse&location=35.658651,139.745415&output=json&pois=1&ak=您的ak //GET请求
 >其实使用curl请求上面的网址后，又是一个坑，会如下数据
-```json
+```
 renderReverse&&renderReverse({"status":0,"result":{"location":{"lng":113.32739999999997,"lat":23.118311010889089},"formatted_address":"广东省广州市天河区临江大道","business":"岭南,珠江新城,跑马场","addressComponent":{"country":"中国","country_code":0,"country_code_iso":"CHN","country_code_iso2":"CN","province":"广东省","city":"广州市","city_level":2,"district":"天河区","town":"","adcode":"440106","street":"临江大道","street_number":"","direction":"","distance":""},"pois":[{"addr":"珠江新城花城广场南侧","cp":" ","direction":"南","distance":"152","name":"海心沙亚运公园-西门","poiType":"出入口","point":{"x":113.32778869654283,"y":23.119524957099445},"tag":"出入口;门","tel":"","uid":"d0691d385cf02939efe4a564","zip":"","parent_poi":{"name":"海心沙亚运公园","tag":"旅游景点;公园","addr":"珠江新城临江大道","point":{"x":113.33142683385704,"y":23.117514109032066},"direction":"西","distance":"458","uid":"b2809cc01cbcea85593ac820"}}],"roads":[],"poiRegions":[],"sematic_description":"海心沙亚运公园-西门南152米","cityCode":257}})
 ```
 #### 你会发现返回的数据会携带renderReverse&&renderReverse这样的头部，在使用json_decode的时候并不好处理，如何进行去除呢，只要将url中的callback=renderReverse去除即可，所以最终你访问的接口地址应该是：http://api.map.baidu.com/geocoder/v2/?location=35.658651,139.745415&output=json&pois=1&ak=您的ak;
 >返回结果即可变成如下：
-```json
+```
 {"status":0,"result":{"location":{"lng":113.32739999999997,"lat":23.118311010889089},"formatted_address":"广东省广州市天河区临江大道","business":"岭南,珠江新城,跑马场","addressComponent":{"country":"中国","country_code":0,"country_code_iso":"CHN","country_code_iso2":"CN","province":"广东省","city":"广州市","city_level":2,"district":"天河区","town":"","adcode":"440106","street":"临江大道","street_number":"","direction":"","distance":""},"pois":[{"addr":"珠江新城花城广场南侧","cp":" ","direction":"南","distance":"152","name":"海心沙亚运公园-西门","poiType":"出入口","point":{"x":113.32778869654283,"y":23.119524957099445},"tag":"出入口;门","tel":"","uid":"d0691d385cf02939efe4a564","zip":"","parent_poi":{"name":"海心沙亚运公园","tag":"旅游景点;公园","addr":"珠江新城临江大道","point":{"x":113.33142683385704,"y":23.117514109032066},"direction":"西","distance":"458","uid":"b2809cc01cbcea85593ac820"}}],"roads":[],"poiRegions":[],"sematic_description":"海心沙亚运公园-西门南152米","cityCode":257}
 ```
 
 #### 案例代码如下：(curl需要自己封装，我已经在张伯龙api中封装好了，请自行下载体验)
 ```php
-		if ($this->sendType="location") {
-			$lat = $this->lat;
-			$lng = $this->lng;
-			$lbsUrl = "http://api.map.baidu.com/geocoder/v2/?location=23.118311,113.327400&output=json&pois=1&ak=3k4o9OMEipspDn5S1SPuZ7OafTqatVDg";
-			$addr= $this->CurlRequest( $lbsUrl );
-			$location = json_decode( $addr,true );//将其转换为数组
+if ($this->sendType="location") {
+	$lat = $this->lat;
+	$lng = $this->lng;
+	$lbsUrl = "http://api.map.baidu.com/geocoder/v2/?location=23.118311,113.327400&output=json&pois=1&ak=3k4o9OMEipspDn5S1SPuZ7OafTqatVDg";
+	$addr= $this->CurlRequest( $lbsUrl );
+	$location = json_decode( $addr,true );//将其转换为数组
 
-			$this->reText( $location['result']['formatted_address']);
-			exit();
-		}
+	$this->reText( $location['result']['formatted_address']);
+	exit();
+}
 ```
 >然后在微信客户端发送一个位置，即可回复地理位置了
 
