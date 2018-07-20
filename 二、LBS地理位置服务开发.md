@@ -55,10 +55,10 @@ class WxApi extends Wechat
 		}
 
 
-		if ($this->sendType="location") {
+		if ($this->sendType=="location") {
 			$lat = $this->lat;
 			$lng = $this->lng;
-			$lbsUrl = "http://api.map.baidu.com/geocoder/v2/?location=23.118311,113.327400&output=json&pois=1&ak=3k4o9OMEipspDn5S1SPuZ7OafTqatVDg";
+			$lbsUrl = "http://api.map.baidu.com/geocoder/v2/?location={$lat},{$lng}&output=json&pois=1&ak=3k4o9OMEipspDn5S1SPuZ7OafTqatVDg";
 			$addr= $this->CurlRequest( $lbsUrl );
 			$location = json_decode( $addr,true );//将其转换为数组
 
@@ -66,7 +66,7 @@ class WxApi extends Wechat
 			$points = $location['result']['pois'];
 
 			foreach ($points as $key => $point) {
-				$content .= ++$key.'、'.$point['name'].'，'.$point['tag'].'，'.$point['addr']."\n";
+				$content .= ++$key.'、'.$point['name'].' '.$point['tag'].' '.$point['addr']."\n";
 			}
 
 			$this->reText( $content );
