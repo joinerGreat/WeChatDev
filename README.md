@@ -10,5 +10,54 @@
 #### 这里强调一下curl的面向对象的分装
 >curl默认是使用get方式请求，以文本流的方式返回数据结果,封装如下：
 ```php
+public function CurlRequest($url,$data=null){
+        //第1步:初始化虚拟浏览器
+        $ch = curl_init();
+        //第2步:设置浏览器
+        curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);//启用安全上传模式
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true );//以text/plain文本流返回
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);//没有ssl认证服务器
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);//告诉api地址不要去找ssl证书
+        //如果data不为空,我们就用post请求
+        if( !empty($data) )
+        {
+            //post方式curl在php5.6以后会抛出温馨提示,所以我们要@屏蔽温馨提示,否则会影响返回结构
+             @curl_setopt($ch, CURLOPT_POST, true); //设置请求方式为post
+             @curl_setopt($ch,CURLOPT_POSTFIELDS,$data);//设置数据包
+        }
+        $result = curl_exec( $ch );
+        curl_close($ch);
+        return $result;
+	}
+```
 
+#### 但是在实际案例中，我们经常需要post请求数据，并且返回json数据格式，这时的封装如下：
+```php
+    public function CurlRequestPostJson( $url,$data )
+    {
+         //第1步:初始化虚拟浏览器
+        $ch = curl_init();
+        //第2步:设置浏览器
+        curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);//启用安全上传模式
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true );//以text/plain文本流返回
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);//没有ssl认证服务器
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);//告诉api地址不要去找ssl证书
+        //把数组变成json
+        $data = json_encode($data);
+        //获取json数据的长度
+        $length = strlen($data);
+        //post方式curl在php5.6以后会抛出温馨提示,所以我们要@屏蔽温馨提示,否则会影响返回结构
+        @curl_setopt($ch, CURLOPT_POST, true); //设置请求方式为post
+        @curl_setopt($ch,CURLOPT_POSTFIELDS,$data);//设置数据包
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER,array(
+            'Content-type: application/json',
+            "Content-length: {$length}")
+        );
+        $result = curl_exec( $ch );
+        curl_close($ch);
+        return $result;
+    }
 ```
