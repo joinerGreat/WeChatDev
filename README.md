@@ -61,3 +61,4 @@ public function CurlRequest($url,$data=null){
         return $result;
     }
 ```
+
