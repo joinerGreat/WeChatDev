@@ -38,8 +38,6 @@ class WeChat
         curl_close($ch);
         return $result;
 	}
-
-    //主要用来请求图灵机器人的问题
     public function CurlRequestPostJson( $url,$data )
     {
          //第1步:初始化虚拟浏览器
@@ -67,53 +65,63 @@ class WeChat
         return $result;
     }
 
-    public function GetAccessToken(){
-        //连接redis
-        $redis = new Redis();
-        $redis -> connect('',);
-        $redis -> auth('');
-        $redis -> select(2); //选择redis的2号数据库来作为access_token的缓存
-        if( $redis -> get('access_token') ){
-            return $redis -> get('access_token');
-        }else{
+    //获取access_token,一天只能调用2000次
+     public function GetAccessToken(){
             $api = WeChatApi::getApiUrl( 'api_access_token' );
             $res = $this -> CurlRequest( $api );
             $json = json_decode($res);
             $access_token = $json -> access_token;  //获取了access_token
-            //设置redis缓存到string类型
-            $redis -> set('access_token',$access_token);
-            //设置缓存3600秒,expire access_token 3600
-            $redis -> setTimeout('access_token',3600);
             return $access_token;
         }
-    }
 
-/*
+//公司项目中使用memcached进行存储access_token
+    // public function GetAccessToken(){
+    //     //连接redis
+    //     $redis = new Redis();
+    //     $redis -> connect('localhost',6379);
+    //     $redis -> auth('php29gogo');
+    //     $redis -> select(2); //选择redis的2号数据库来作为access_token的缓存
+    //     if( $redis -> get('access_token') ){
+    //         return $redis -> get('access_token');
+    //     }else{
+    //         $api = WeChatApi::getApiUrl( 'api_access_token' );
+    //         $res = $this -> CurlRequest( $api );
+    //         $json = json_decode($res);
+    //         $access_token = $json -> access_token;  //获取了access_token
+    //         //设置redis缓存到string类型
+    //         $redis -> set('access_token',$access_token);
+    //         //设置缓存3600秒,expire access_token 3600
+    //         $redis -> setTimeout('access_token',3600);
+    //         return $access_token;
+    //     }
+    // }
+
+// 学习中使用memcached进行存储access_token
     //获取access_token
-	public function GetAccessToken(){
-        //实例化memcached
-        $memcached = new memcached();
-        //定义memcached的分布式服务器
-        $servers = array(
-            ['localhost','11211',100],
-        );
-        //使用addServers方法来连接服务器
-        $memcached -> addServers( $servers );
-        if( $memcached -> get('access_token') ){
-            //如果缓存中有access_token直接返回
-            return  $memcached -> get('access_token');
-        }else{
-            $api = WeChatApi::getApiUrl( 'api_access_token' );
-            $res = $this -> CurlRequest( $api );
-            $json = json_decode($res);
-            $access_token = $json -> access_token;  //获取了access_token
-            $memcached -> set('access_token',$access_token,3600);
-            return $access_token;
-        }
+	// public function GetAccessToken(){
+ //        //实例化memcached
+ //        $memcached = new memcached();
+ //        //定义memcached的分布式服务器
+ //        $servers = array(
+ //            ['localhost','11211',100],
+ //        );
+ //        //使用addServers方法来连接服务器
+ //        $memcached -> addServers( $servers );
+ //        if( $memcached -> get('access_token') ){
+ //            //如果缓存中有access_token直接返回
+ //            return  $memcached -> get('access_token');
+ //        }else{
+ //            $api = WeChatApi::getApiUrl( 'api_access_token' );
+ //            $res = $this -> CurlRequest( $api );
+ //            $json = json_decode($res);
+ //            $access_token = $json -> access_token;  //获取了access_token
+ //            $memcached -> set('access_token',$access_token,3600);
+ //            return $access_token;
+ //        }
 
-	}
+	// }
 
-*/
+
 	//自动回复(此方法必须覆盖)
 	public function responseMsg(){
         //修改此代码兼容php5.3和php5.5,php5.6,php7.0等以上版本
@@ -154,7 +162,7 @@ class WeChat
     //视频回复接口
     protected function reVideo($MediaId,$title,$desc){
         $resultStr = sprintf(WeChatApi::getMsgTpl('video'), $this->fromUsername, $this->toUsername, $this->time, 'video', $MediaId,$title,$desc);
-        echo $resultStr;      
+        echo $resultStr;
     }
 
     //items是一个数组,其下标如下:
@@ -240,7 +248,7 @@ class WeChat
             "touser"=>"{$fromUsername}",
             "msgtype"=>"news",
             "news" => array(
-                "articles" => $set,
+            "articles" => $set,
             ),
         );
         $data = json_encode($data);   
@@ -273,9 +281,18 @@ class WeChat
 		$validInfo = json_decode($str,true);
 		return $validInfo;
     }
-    public function getUserInfo($web_access_token,$openId){
+    //老版微信拉取用户信息
+    // public function getUserInfo($web_access_token,$openId){
+    //     $url = WeChatApi::getApiUrl('api_get_userinfo');
+    //     $url .= "access_token={$web_access_token}&openid={$openId}&lang=zh_CN";
+    //     $str = $this->CurlRequest( $url );
+    //     $userInfo = json_decode($str,true);
+    //     return $userInfo;
+    // }
+    // 新版微信拉取用户信息
+    public function getUserInfo(){
         $url = WeChatApi::getApiUrl('api_get_userinfo');
-        $url .= "access_token={$web_access_token}&openid={$openId}&lang=zh_CN";
+        $url .= "access_token=".$this->GetAccessToken()."&openid=".$this->fromUsername."&lang=zh_CN";
         $str = $this->CurlRequest( $url );
         $userInfo = json_decode($str,true);
         return $userInfo;

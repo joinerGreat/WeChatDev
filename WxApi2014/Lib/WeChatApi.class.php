@@ -22,8 +22,10 @@ class WeChatApi
 			'api_upload_media'=>'https://api.weixin.qq.com/cgi-bin/media/upload?type=image&access_token=',
 			//授权验证接口
 			'web_access_auth'=>'https://api.weixin.qq.com/sns/auth?',
-			//snsapi_userinfo拉取用户信息接口
-			'api_get_userinfo'=>'https://api.weixin.qq.com/sns/userinfo?',
+			//snsapi_userinfo拉取用户信息接口(老版)
+			// 'api_get_userinfo'=>'https://api.weixin.qq.com/sns/userinfo?',
+			//新版微信拉取用户信息(2018/7/23,开发中进行更新)
+			'api_get_userinfo'=>'https://api.weixin.qq.com/cgi-bin/user/info?',
 
 		);
 		return $url[$name];
@@ -42,28 +44,25 @@ class WeChatApi
 	public static function getMsgTpl($type){
 			$tpl = array(
 				//文本模板
-				"text" =>  "<xml>
-					      <ToUserName><![CDATA[%s]]></ToUserName>
+				"text" =>  "<xml><ToUserName><![CDATA[%s]]></ToUserName>
 					     <FromUserName><![CDATA[%s]]></FromUserName>
 					     <CreateTime>%s</CreateTime>
 					     <MsgType><![CDATA[%s]]></MsgType>
 					     <Content><![CDATA[%s]]></Content>
 					     <FuncFlag>0</FuncFlag>
-					      </xml>",
+					     </xml>",
 				//图片模板
-             	"image" => "<xml>
-				         <ToUserName><![CDATA[%s]]></ToUserName>
-				         <FromUserName><![CDATA[%s]]></FromUserName>
-				         <CreateTime>%s</CreateTime>
+             	"image" => "<xml><ToUserName><![CDATA[%s]]></ToUserName>
+				        <FromUserName><![CDATA[%s]]></FromUserName>
+				        <CreateTime>%s</CreateTime>
 				        <MsgType><![CDATA[%s]]></MsgType>
-				       <Image>
-				      <MediaId><![CDATA[%s]]></MediaId>
-				      </Image>
-	                  </xml>",
+				        <Image>
+				        <MediaId><![CDATA[%s]]></MediaId>
+				        </Image>
+	                    </xml>",
 
 			   //音乐模板
-	           "music"=>"<xml>
-			    <ToUserName><![CDATA[%s]]></ToUserName>
+	           "music"=>"<xml><ToUserName><![CDATA[%s]]></ToUserName>
 			    <FromUserName><![CDATA[%s]]></FromUserName>
 			    <CreateTime>%s</CreateTime>
 			    <MsgType><![CDATA[%s]]></MsgType>
@@ -75,8 +74,7 @@ class WeChatApi
 			    </Music>
 			    </xml>",
 			    //视频模板
-			    "video"=>"<xml>
-				<ToUserName><![CDATA[%s]]></ToUserName>
+			    "video"=>"<xml><ToUserName><![CDATA[%s]]></ToUserName>
 				<FromUserName><![CDATA[%s]]></FromUserName>
 				<CreateTime>%s</CreateTime>
 				<MsgType><![CDATA[%s]]></MsgType>
@@ -84,12 +82,11 @@ class WeChatApi
 				<MediaId><![CDATA[%s]]></MediaId>
 				<Title><![CDATA[%s]]></Title>
 				<Description><![CDATA[%s]]></Description>
-				</Video> 
+				</Video>
 				</xml>",
 
 		        //图文模板
-		        "news" => "<xml>
-				<ToUserName><![CDATA[%s]]></ToUserName>
+		        "news" => "<xml><ToUserName><![CDATA[%s]]></ToUserName>
 				<FromUserName><![CDATA[%s]]></FromUserName>
 				<CreateTime>%s</CreateTime>
 				<MsgType><![CDATA[%s]]></MsgType>
