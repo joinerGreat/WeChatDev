@@ -2,65 +2,64 @@
 >微信中需要开发全新的功能，必然用到接口请求，在这里我们先要在wechatApi文件中配置接口url:(请配置成自己后台接口地址)
 ```php
 //微信公众号的后台配置
-			'api_wxoa_config'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法",
-			//监听微信公众号的用户
-			'api_wxoa_user'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
-			//录入操作时间
-			'api_wxoa_addtime'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
-			//将值置为1的操作
-			'api_wxoa_valone'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
+'api_wxoa_config'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法",
+//监听微信公众号的用户
+'api_wxoa_user'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
+//录入操作时间
+'api_wxoa_addtime'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
+//将值置为1的操作
+'api_wxoa_valone'=>"https://www.xxx.com/admin/index.php/模型/控制器/方法?openid=",
 ```
 >熟悉thinkphp的人，一看就能懂，如果使用的是laravel框架和CII框架或者tp5以上的同学，请填写自己的正确路由地址;
 #### tp后台方法代码如下
 ```php
  //微信公众号的接口
-		public  function wxConfig(){
-			$data = M("wxoa_config")->select();
-			$content =[];
-			foreach ($data as $key => $value) {
-					$content[]=$value['keyword'];
+	public  function wxConfig(){
+		$data = M("wxoa_config")->select();
+		$content =[];
+		foreach ($data as $key => $value) {
+				$content[]=$value['keyword'];
+		}
+		foreach ($data as $key => $value) {
+				if (!empty($value['day'])) {
+					$content['day']=$value['day'];
+				}
+		}
+		$json = json_encode($content);
+		echo $json;
+	}
 
-			}
-			foreach ($data as $key => $value) {
-					if (!empty($value['day'])) {
-						$content['day']=$value['day'];
-					}
-			}
-			$json = json_encode($content);
+//微信用户的监听
+	public  function wxUser(){
+			$map["openid"] = I("get.openid");
+            $user = M("wxoa_user")->where($map)->find();
+            $json = json_encode($user);
 			echo $json;
-		}
-
-		//微信用户的监听
-		public  function wxUser(){
-				$map["openid"] = I("get.openid");
-            	$user = M("wxoa_user")->where($map)->find();
-            	$json = json_encode($user);
-				echo $json;
-		}
+	}
 
 
-		//录入投票时间
-		public  function wxAddTime(){
-				$map["openid"] = I("get.openid");
-				$fieldname = I("get.fieldname");
-				$time_name = I("get.time_name");
-            	$user = M("wxoa_user")->where($map)->find();
-            	$data["id"] = $user["id"];
-	            $data[$fieldname] = $user[$fieldname]+1;
-	            $data[$time_name] = time();
-	            //进行裁剪图片路径的入库
-	            M("wxoa_user")->save($data);
-		}
+//录入投票时间
+	public  function wxAddTime(){
+			$map["openid"] = I("get.openid");
+			$fieldname = I("get.fieldname");
+			$time_name = I("get.time_name");
+            $user = M("wxoa_user")->where($map)->find();
+            $data["id"] = $user["id"];
+	        $data[$fieldname] = $user[$fieldname]+1;
+	        $data[$time_name] = time();
+	        //进行裁剪图片路径的入库
+	        M("wxoa_user")->save($data);
+	}
 
-		//将值置为1的操作
-		public function valToOne(){
-				$map["openid"] = I("get.openid");
-            	$user = M("wxoa_user")->where($map)->find();
-            	$data["id"] = $user["id"];
-	            $data[I("get.fieldname")] = I("get.changval");
-	            //进行裁剪图片路径的入库
-	            M("wxoa_user")->save($data);
-		}
+//将值置为1的操作
+	public function valToOne(){
+			$map["openid"] = I("get.openid");
+            $user = M("wxoa_user")->where($map)->find();
+            $data["id"] = $user["id"];
+	        $data[I("get.fieldname")] = I("get.changval");
+	        //进行裁剪图片路径的入库
+	         M("wxoa_user")->save($data);
+	}
 ```
 
 #### wechat文件中自己封装请求方法代码如下
@@ -99,7 +98,7 @@
 ```
 
 ### 在开发文件中api.php中我实现签到方法如下：
-###在写签到方法的时候需要列出签到的各种限制条件：
+### 在写签到方法的时候需要列出签到的各种限制条件：
 #### 只有同一openid的人在每天回复签到时+1
 #### 每天只能签到一次，如果已经签到，则提示已签到，请明天再来
 #### 必须连续签到，如果非连续，断开一次就从一开始
