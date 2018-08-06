@@ -1,0 +1,233 @@
+$(document).ready(function () {
+
+    $.validator.addMethod("isMobile", function (value, element) {
+        var length = value.length;
+        var mobile = /^(((13[0-9]{1})|(15[0-9]{1}))+\d{8})$/;
+        return this.optional(element) || (length == 11 && mobile.test(value));
+    }, "请正确填写您的手机号码");
+
+    $.validator.addMethod("isQQ", function (value, element, params) {
+        var checkQQ = /^[1-9][0-9]{4,19}$/;
+        return this.optional(element) || (checkQQ.test(value));
+    }, "*请输入正确的QQ号码！");
+
+
+    /**vip票跳转 */
+    function toVip() {
+        var form = document.createElement('form');
+        form.action = 'http://www.huodongxing.com/event/1451508466800';
+        form.target = '_blank';
+        form.method = 'POST';
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+
+    $(".form-close").click(function () {
+        $(".popup-dialog").hide();
+        $(".dialog-form").hide();
+    })
+
+
+    $("#msbm").click(function () {
+        $(".popup-dialog").show();
+        $("#form1").show();
+    });
+
+    var type = 1;
+
+    $(".btn-normal").click(function () {
+        $("#form1").hide();
+        $("#form2").show();
+        type = 1;
+    });
+
+    $(".btn-vip").click(function () {
+        $("#form1").hide();
+        $("#form2").show();
+        type = 2;
+    });
+
+
+
+    var timer;
+
+    $(".send-msg").click(function () {
+        var mobile = $("#form2").find("input").eq(3).val();
+        $.ajax({
+            type: "post",
+            data: {
+                mobile: mobile
+            },
+            url: config.ip + config.port + config.api.sendcode,
+            success: function (data) {
+                $(".send-msg").hide();
+                $(".send-msg-after").show(function () {
+                    if (timer) {
+                        clearInterval(timer);
+                    }
+
+                    var time = 52;
+
+                    timer = setInterval(function () {
+                        $(".send-msg-after").html((time--) + "s后重新发送");
+                        if (time < 0) {
+                            $(".send-msg-after").hide();
+                            $(".send-msg").show();
+                        }
+                    }, 1000);
+                });
+            }
+        });
+    });
+
+    $("#form2").validate({
+        rules: {
+            mobile: {
+                isMobile: true
+            },
+            qq: {
+                isQQ: true
+            }
+        },
+
+        messages: {
+            mobile: "请正确填写您的手机号码",
+            qq: "请正确填写您的qq号码"
+        },
+
+        submitHandler: function () { //通过之后回调
+            var input = $("#form2").find("input");
+            //进行ajax传值
+            $.ajax({
+                type: "post",
+                data: {
+                    company_name: input.eq(0).val(),
+                    username: input.eq(1).val(),
+                    position: input.eq(2).val(),
+                    mobile: input.eq(3).val(),
+                    code: input.eq(4).val(),
+                    qq: input.eq(5).val(),
+                    type: type
+                },
+                url: config.ip + config.port + config.api.onlinesign,
+                success: function (data) {
+                    $("#form2").hide();
+                    $("#form0").show();
+                    if (type === 2) {
+                        $("#success-tip").text("您已预订2018开发者大会VIP票，请按时出席会议。");
+                        $("#openPage").submit();
+                    } else {
+                        $("#success-tip").text("您已预订2018开发者大会普通票，请按时出席会议。");
+                    }
+                },
+                error: function () {
+                    $("#form").show();
+                }
+            });
+        },
+        invalidHandler: function (form, validator) {
+            return false;
+        }
+    });
+
+
+
+    var zanzhuType = 1;
+
+    $(".cw-zzs").find(".btn").click(function () {
+        var zanzhuType = $(".cw-zzs").find(".btn").index($(this)) + 1;
+        if (zanzhuType < 6) {
+            $("#form3").show();
+        } else {
+            $("#form4").show();
+        }
+
+    });
+
+
+    $("#form3").validate({
+        rules: {
+            mobile: {
+                isMobile: true
+            }
+        },
+
+        messages: {
+            mobile: "请正确填写您的手机号码"
+        },
+        submitHandler: function (form) { //通过之后回调
+            var input = $("#form3").find("input");
+            //进行ajax传值
+            $.ajax({
+                type: "post",
+                data: {
+                    company_name: input.eq(0).val(),
+                    username: input.eq(1).val(),
+                    position: input.eq(2).val(),
+                    mobile: input.eq(3).val(),
+                    weixin: input.eq(4).val(),
+                    type: zanzhuType
+                },
+                url: config.ip + config.port + config.api.zanzhu,
+                success: function (data) {
+                    $("#form3").hide();
+                    $("#success-tip").text("企业赞助申请已提交。");
+                    $("#form0").show();
+                },
+                error: function () {
+                    $("#form").show();
+                }
+            });
+        },
+        invalidHandler: function (form, validator) {
+            return false;
+        }
+    });
+
+
+    $("#form4").validate({
+        rules: {
+            mobile: {
+                isMobile: true
+            }
+        },
+
+        messages: {
+            mobile: "请正确填写您的手机号码"
+        },
+        submitHandler: function (form) { //通过之后回调
+            var input = $("#form4").find("input");
+            //进行ajax传值
+            $.ajax({
+                type: "post",
+                data: {
+                    media_name: input.eq(0).val(),
+                    username: input.eq(1).val(),
+                    position: input.eq(2).val(),
+                    mobile: input.eq(3).val(),
+                    weixin: input.eq(4).val()
+                },
+                url: config.ip + config.port + config.api.mediaentry,
+                success: function (data) {
+                    $("#form4").hide();
+                    $("#success-tip").text("媒体申请已提交。");
+                    $("#form0").show();
+                },
+                error: function () {
+                    $("#form").show();
+                }
+            });
+        },
+        invalidHandler: function (form, validator) {
+            return false;
+        }
+    });
+
+    $("#goTop").click(function () {
+        $("body,html").animate({
+            "scrollTop": 0
+        }, 1000);
+    });
+
+});
